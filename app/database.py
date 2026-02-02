@@ -13,11 +13,13 @@ class Base(DeclarativeBase):
     pass
 
 
-async def get_db():
+async def get_db() -> AsyncSession:
     """Получение базы данных для записи данных."""
 
     async with AsyncSessionLocal() as session:
         try:
             yield session
-        finally:
-            await session.close()
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
